@@ -1,4 +1,6 @@
-const socket = io();
+// const socket = io();
+
+const socket = io('https://chat-application-one-plum.vercel.app');
 
 const clientsTotal = document.getElementById('clients-total');
 
