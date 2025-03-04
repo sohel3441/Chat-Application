@@ -1,174 +1,267 @@
+const socket = io();
+
+const clientsTotal = document.getElementById('clients-total');
+
+const messageContainer = document.getElementById('message-container');
+const messageForm = document.getElementById('message-form');
+const messageInput =  document.getElementById('message-input');
+const nameInput = document.getElementById('name-input');
+
+const messageTone = new Audio('/Whatsapp Message.mp3')
+
+socket.on('clients-total' , (data) => {
+    clientsTotal.innerText = `Total clients ${data}`
+})
+
+messageForm.addEventListener('submit' , (e) => {
+    e.preventDefault();
+   sendMessage();
+})
+
+function sendMessage ()  {
+    if(messageInput.value === '') return
+    const data = {
+       name : nameInput.value,
+        message : messageInput.value,
+        dateTime : new Date()
+    }
+    socket.emit('message' , data);
+    addMessageToUI(true , data) ;
+    messageInput.value = '';
+}
+
+socket.on('chat-message' , (data) => {
+    messageTone.play();
+    addMessageToUI(false , data);
+})
+
+function addMessageToUI (isOwnMessage , data) {
+    clearFeedBack();
+    const element = `
+      <li class="${isOwnMessage ? "message-right" : 'message-left'}">
+          <p class="message">
+           ${data.message}
+            <span>${data.name}  Updated ${moment(data.dateTime).fromNow()}</span>
+          </p>   
+        </li>`
+
+        messageContainer.innerHTML += element;
+        scrollToBottom();
+}
+
+
+function scrollToBottom () {
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+
+}
+
+messageInput.addEventListener('focus' , (e) => {
+    socket.emit('feedback' , {
+        feedback : `${nameInput.value} is typing a message`
+    })
+})
+
+messageInput.addEventListener('keypress' , (e) => {
+    socket.emit('feedback' , {
+        feedback : `${nameInput.value} is typing a message`
+    })
+})
+
+messageInput.addEventListener('blur' , (e) => {
+    socket.emit('feedback' , {
+        feedback : ``
+    })
+})
+
+socket.on('feedback' , (data) => {
+    clearFeedBack();
+    const element = `
+          <li class="message-feedback">
+          <p class="feedback" id="feedback">${data.feedback}</p>
+          </li>`
+          messageContainer.innerHTML += element;
+})
+
+
+function clearFeedBack () {
+   document.querySelectorAll('li.message-feedback').forEach(element => {
+    element.parentNode.removeChild(element);
+   })
+}
+
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat Application</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+      integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
+    <div class="main">
+      <div class="name">
+        <span class="far fa-user"></span>
+        <input
+          type="text"
+          class="name-input"
+          id="name-input"
+          value="User"
+          maxlength="20"
+        />
+      </div>
+      <ul class="message-container" id="message-container">
+        <!-- <li class="message-left">
+          <p class="message">
+           
+            <span></span>
+          </p>
+        </li> -->
+
+        <!-- <li class="message-right">
+          <p class="message">
+
+            <span></span>
+          </p>
+        </li> -->
+        <!-- <li class="message-feedback">
+          <p class="feedback" id="feedback">sohel is typing a message</p>
+        </li> -->
+      </ul>
+
+      <form class="message-form" id="message-form">
+        <input
+          type="text"
+          name="message"
+          id="message-input"
+          class="message-input"
+        />
+        <div class="v-divider"></div>
+        <button type="submit" class="send-button">
+          Send <span><i class="fas fa-paper-plane"></i></span>
+        </button>
+      </form>
+    </div>
+    <h3 class="clients-total" id="clients-total">Total Clients : 2</h3>
+
     <script src="/socket.io/socket.io.js"></script>
-</head>
-<body>
-    <h1>Chat Application</h1>
-    <input type="text" id="messageInput" placeholder="Enter your message...">
-    <button id="sendButton">Send</button>
-       <div id="messageDiv"></div>
-    <script>
-      const socket = io ();
+             
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
 
-      const messageInput = document.getElementById('messageInput');
-      const sendButton = document.getElementById('sendButton');
-      const messageDiv = document.getElementById('messageDiv');
 
-      sendButton.addEventListener('click' , () => {
-        const message = messageInput.value;
-        socket.emit('user-message', message);
-        messageInput.value = '';
-      });
-
-      // Send the message
-      socket.on('message', (message) => {
-        const p = document.createElement('p');
-        p.innerText = message;
-        messageDiv.appendChild(p);
-      });
-    </script>
-</body>
+    <script src="main.js"></script>
+  </body>
 </html>
 
+In this code when the user send the massage then show the time of massage instead of user updated a few seconds ago
 
-/css
-/* * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    scroll-behavior: smooth;
+
+              <span>${data.name}  Updated ${moment(data.dateTime).fromNow()}</span> 
+
+
+
+
+
+
+
+
+
+
+const socket = io();
+
+const clientsTotal = document.getElementById('clients-total');
+
+const messageContainer = document.getElementById('message-container');
+const messageForm = document.getElementById('message-form');
+const messageInput =  document.getElementById('message-input');
+const nameInput = document.getElementById('name-input');
+
+const messageTone = new Audio('/Whatsapp Message.mp3')
+
+socket.on('clients-total' , (data) => {
+    clientsTotal.innerText = `Total clients ${data}`
+})
+
+messageForm.addEventListener('submit' , (e) => {
+    e.preventDefault();
+   sendMessage();
+})
+
+function sendMessage ()  {
+    if(messageInput.value === '') return
+    const data = {
+       name : nameInput.value,
+        message : messageInput.value,
+        dateTime : new Date()
+    }
+    socket.emit('message' , data);
+    addMessageToUI(true , data) ;
+    messageInput.value = '';
 }
 
-body{
-    font-family: Arial, 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    background-color: #ebebeb;
-    display: grid;
-    place-items: center;
-}
+socket.on('chat-message' , (data) => {
+    messageTone.play();
+    addMessageToUI(false , data);
+})
 
-.title{
-    margin: 20px 0;
-}
+function addMessageToUI (isOwnMessage , data) {
+    clearFeedBack();
+    const element = `
+      <li class="${isOwnMessage ? "message-right" : 'message-left'}">
+          <p class="message">
+           ${data.message}
+            <span>${data.name} • ${moment(data.dateTime).format('h:mm A')}</span>
 
-.main{
-    border: 8px solid #dddddd;
-    border-radius: 24px;
-    overflow:  hidden;
-}
+          </p>   
+        </li>`
 
-.name{
-    display: flex;
-    font-size: 32px;
-    font-weight: 700;
-    padding: 8px 16px;
-    color: #7e7e7e;
-    background-color: #ebebeb;
-}
-
-.name > span {
-    color: #bbb;
-}
-
-.name-input{
-    font-size: 24px;
-    font-weight: 700;
-    color: #7e7e7e;
-    flex-grow: 1;
-    border: none;
-    margin: 0px 12px;
-    outline: none;
-    background-color: #ebebeb;
-}
-
-.message-container{
-display: flex;
-flex-direction: column;
-background-color: #f6f6f6;
-width: 400px;
-height: 600px;
-overflow-y: scroll;
-overflow-x: hidden;
-}
-
-.message-left,
-.message-right{
-    list-style: none;
-    padding: 8px 12px;
-    margin: 12px;
-    max-width: 250px;
-    font-size: 18px;
-    word-wrap: break-word;
-}
-
-.message-left{
-    border-radius: 20px 20px 20px 0px;
-    align-self: flex-start;
-    background-color: #fff;
-    box-shadow: -2px 2px 4px #dcdcdc ;
-}
-
-.message-right {
-    border-radius: 20px 20px 0px 20px;
-    align-self: flex-end;
-    background-color: #2d2d2d;
-    box-shadow: 2px 2px 4px #dcdcdc ;
-    color: #f6f6f6;
+        messageContainer.innerHTML += element;
+        scrollToBottom();
 }
 
 
-.message-left > p > span,
-.message-right > p > span{
-    display: block;
-    font-style: italic;
-    font-size: 12px;
-    margin-top: 4px;
+function scrollToBottom () {
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+
 }
 
-.feedback{
-    font-style: italic;
-    font-size: 14px;
-    padding: 0px  16px  16px  16px;
-    color: #2d2d2d;
-    text-align: center;
-}
+messageInput.addEventListener('focus' , (e) => {
+    socket.emit('feedback' , {
+        feedback : `${nameInput.value} is typing a message`
+    })
+})
 
-.message-form{
-    display: flex;
-    justify-content: space-between;
-    width: 400px;
-}
+messageInput.addEventListener('keypress' , (e) => {
+    socket.emit('feedback' , {
+        feedback : `${nameInput.value} is typing a message`
+    })
+})
 
-.message-input{
-    flex-grow: 1;
-    height: 48px;
-    font-size: 16px;
-    border: none;
-    outline: none;
-    padding: 0 12px;
-    background-color: #fff; 
-}
+messageInput.addEventListener('blur' , (e) => {
+    socket.emit('feedback' , {
+        feedback : ``
+    })
+})
 
-.send-button{
-    height: 48px;
-    font: 16px;
-    border: none;
-    outline: none;
-    background-color: #fff;
-    padding: 0px 20px;
-    cursor: pointer;    
-}
+socket.on('feedback' , (data) => {
+    clearFeedBack();
+    const element = `
+          <li class="message-feedback">
+          <p class="feedback" id="feedback">${data.feedback}</p>
+          </li>`
+          messageContainer.innerHTML += element;
+})
 
-.v-divider{
-    height: 48px;
-    width: 2px;
-    background-color: #f6f6f6;
-}
 
-.clients-total{
-    margin: 20px 0;
-    color:#7e7e7e ;
-} */
+function clearFeedBack () {
+   document.querySelectorAll('li.message-feedback').forEach(element => {
+    element.parentNode.removeChild(element);
+   })
+}

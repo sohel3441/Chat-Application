@@ -35,19 +35,64 @@ socket.on('chat-message' , (data) => {
     addMessageToUI(false , data);
 })
 
-function addMessageToUI (isOwnMessage , data) {
+function addMessageToUI(isOwnMessage, data) {
     clearFeedBack();
-    const element = `
-      <li class="${isOwnMessage ? "message-right" : 'message-left'}">
+
+    const li = document.createElement("li");
+    li.className = isOwnMessage ? "message-right" : "message-left";
+    li.innerHTML = `
+        <p class="message">
+           ${data.message}
+            <span>${data.name} • ${moment(data.dateTime).format('h:mm A')}</span>
+        </p>`;
+
+    messageContainer.appendChild(li);
+    saveMessageToLocalStorage(data);
+    scrollToBottom();
+}
+
+
+function saveMessageToLocalStorage(message) {
+    let messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
+    
+    // Limit to last 100 messages
+    if (messages.length >= 100) {
+        messages.shift(); // Remove the oldest message
+    }
+
+    messages.push(message);
+    localStorage.setItem("chatMessages", JSON.stringify(messages));
+}
+
+
+
+function loadMessagesFromLocalStorage() {
+    let messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
+    const fragment = document.createDocumentFragment();
+
+    messages.forEach((data) => {
+        const isOwnMessage = data.name === nameInput.value;
+        const li = document.createElement("li");
+        li.className = isOwnMessage ? "message-right" : "message-left";
+        li.innerHTML = `
           <p class="message">
            ${data.message}
-            <span>${data.name}  Updated ${moment(data.dateTime).fromNow()}</span>
-          </p>   
-        </li>`
+            <span>${data.name} • ${moment(data.dateTime).format('h:mm A')}</span>
+          </p>
+        `;
+        fragment.appendChild(li);
+    });
 
-        messageContainer.innerHTML += element;
-        scrollToBottom();
+    messageContainer.appendChild(fragment); // Append all at once
+    scrollToBottom();
 }
+
+
+// Load messages when page loads
+document.addEventListener("DOMContentLoaded", loadMessagesFromLocalStorage);
+
+
+
 
 
 function scrollToBottom () {
