@@ -3,7 +3,11 @@
 
 // const socket = io('https://chat-application-one-plum.vercel.app');
 // const socket = io();
-const socket = io("https://chat-application-one-plum.vercel.app");
+
+// const socket = io("https://chat-application-one-plum.vercel.app");
+const socket = io("https://chat-application-one-plum.vercel.app", {
+    transports: ["websocket", "polling"]
+});
 
 const clientsTotal = document.getElementById('clients-total');
 
