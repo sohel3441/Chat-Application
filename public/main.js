@@ -114,12 +114,10 @@
 
 
 
- const socket = io("https://chat-application-one-plum.vercel.app", {
-       transports: ["websocket", "polling"]
-     });
+
 
  
-// const socket = io();
+ const socket = io();
 
 const clientsTotal = document.getElementById('clients-total');
 const messageContainer = document.getElementById('message-container');
