@@ -4,7 +4,10 @@ import http from "http";
 import path from "path";
 import { Server } from "socket.io";
 import cors from 'cors';
+import dotenv from 'dotenv';
 
+dotenv.config();
+const PORT = process.env.PORT || 3000
 
 const app = express();
 const port = 7000;
@@ -54,7 +57,7 @@ function onConnected (socket) {
 
 
 
- server.listen(port , () => {
-     console.log(`Server running at http://localhost:${port}`);
+ server.listen(PORT , () => {
+     console.log(`Server running at http://localhost:${PORT}`);
  });
 
